@@ -1,0 +1,354 @@
+---
+title: "Quarto and Tidy Data"
+subtitle: "MKTG 411 Marketing Analytics"
+output: 
+  ioslides_presentation:
+    widescreen: true
+    css: ../style.css
+---
+
+## Attention to Detail
+
+<center>
+![](../../Figures/meme_debugging.png){width=800px}
+</center>
+
+---
+
+<center>
+![](../../Figures/monsters_debugging.png){width=850px}
+</center>
+
+## Marketing Analytics Process
+
+<center>
+![](../../Figures/process_tidy.png){width=900px}
+</center>
+
+---
+
+![](../../Figures/hex_rmarkdown-tidyr.png){width=850px}
+
+---
+
+![](../../Figures/hex_quarto-tidyr.png){width=850px}
+
+---
+
+<center>
+![](../../Figures/monsters_quarto.png){width=800px}
+</center>
+
+## Quarto
+
+Quarto is a powerful **typesetting tool**. Instead of writing the report or presentation in Word, PowerPoint, or a Google Doc; running code in an R script; saving output and visualizations; and pasting them in the report or the presentation -- we can do it all in Quarto.
+
+- [Markdown](https://quarto.org/docs/authoring/markdown-basics.html): Simple typesetting syntax.
+- [Quarto](https://quarto.org/docs/guide/): Allows us to include code cells (in R, Python, SQL, etc.) and output as part of the document.
+- [Pandoc](https://pandoc.org): Magic that outputs the Quarto document as nearly anything.
+
+## YAML
+
+The header at the top of a Quarto document coded in **YAML** (i.e., Yet Another Markup Language).
+
+```
+---
+title: "Exercise 5"
+author: "Marc Dotson"
+format: docx
+---
+```
+
+While Quarto can produce HTML documents, PowerPoint slides, slides (like these), [GitHub documents](https://github.com/marcdotson/ra-training), [blogs](https://www.occasionaldivergences.com), webpages, etc. -- unless specified otherwise, **all subsequent assignments will be submitted as Word documents rendered from a Quarto document**.
+
+## Quarto Basics
+
+- Use `##` headings and `###` sub-headings to clearly identify sections.
+- Code cells begin with `‘‘‘{r}` and end with `‘‘‘` and should include *comments* but not *text*.
+- Use a separate code cell for every question so that output and text can be provided *in-line*.
+- Produce bullet points using -s.
+- Identify `functions` and `data` with `s, *italics* with *s, and **bold** with **s.
+- Quarto also has a visual editor.
+- There are options, including running all previous code or a single code cell.
+- Pay attention to required white space.
+- Render the document to produce the specified output.
+- **Always read the output.**
+
+---
+
+```{r}
+library(tidyverse)
+```
+
+---
+
+```{r eval=FALSE}
+crm_data <- read_csv("customer_data.csv") |> 
+  left_join(read_csv("store_transactions.csv"), join_by(customer_id))
+```
+
+```{r echo=FALSE}
+crm_data <- read_csv(here::here("Data", "customer_data.csv")) |> 
+  left_join(read_csv(here::here("Data", "store_transactions.csv")), join_by(customer_id))
+```
+
+## Data Structure and Summarizing
+
+How can we summarize the transactions for 2018 by region?
+
+```{r}
+crm_data |> 
+  select(region, customer_id, contains("2018"))
+```
+
+## Tidy Data
+
+**Tidy data** is defined as follows:
+
+- Each observation has its own row.
+- Each variable has its own column.
+- Each value has its own cell.
+
+This may seem obvious or simple, but this common philosophy is at the heart of the *tidy*verse. It also means we will often prefer **longer** datasets to **wider** datasets and {tidyr} will help us move between the two.
+
+---
+
+<center>
+![](../../Figures/wide_long.png){width=750px}
+</center>
+
+## Pivot Longer
+
+The most common identifying feature of **messy data** is when column names are really values.
+
+```{r}
+crm_data |> 
+  select(region, customer_id, contains("2018"))
+```
+
+---
+
+When column names are really values, the data frame ends up being wider than it should be. Use `pivot_longer()` to pivot the data frame longer by **turning column names into values**.
+
+```{r}
+crm_long <- crm_data |>
+  select(region, customer_id, contains("2018")) |> 
+  pivot_longer(
+    -c(region, customer_id),
+    names_to = "month_year",
+    values_to = "transactions"
+  )
+```
+
+---
+
+Note how much *longer* the data frame is and *why*.
+
+```{r}
+crm_long
+```
+
+---
+
+Now summarizing the transactions for 2018 by region is trivial.
+
+```{r}
+crm_long |> 
+  group_by(region) |> 
+  summarize(
+    total_transactions = sum(transactions),
+    avg_transactions = mean(transactions)
+  )
+```
+
+## Pivot Wider
+
+If the data has the opposite problem and has values that should really be column names, use `pivot_wider()` to pivot the data frame wider by **turning values into column names**.
+
+```{r}
+crm_long |> 
+  pivot_wider(
+    names_from = month_year,
+    values_from = transactions
+  )
+```
+
+---
+
+<center>
+![](../../Figures/pivot.gif){width=500px}
+</center>
+
+## Separate Columns
+
+If two (or more) values are in one column, `separate()` the values into two (or more) columns.
+
+```{r}
+crm_long
+```
+
+---
+
+```{r}
+crm_long <- crm_long |>
+  separate(month_year, c("month", "year"), sep = "_")
+
+crm_long
+```
+
+---
+
+Now we can summarize the transactions for 2018 by month *and* region.
+
+```{r}
+crm_long |> 
+  group_by(month, region) |> 
+  summarize(
+    total_transactions = sum(transactions),
+    avg_transactions = mean(transactions)
+  ) |> 
+  arrange(desc(avg_transactions))
+```
+
+## Unite Columns
+
+When two (or more) values should be in one column, `unite()` the values into one column.
+
+```{r}
+crm_long |>
+  unite("month_year", c(month, year), sep = "_")
+```
+
+---
+
+Of all the {tidyr} functions, `unite()` might seem the least useful. However, we really would like `month_year` to be an actual date. If we can add a day, we can use {lubridate} to create a date.
+
+```{r}
+crm_long <- crm_long |>
+  mutate(day = 1) |> 
+  unite("date", c(day, month, year), sep = "-") |> 
+  mutate(date = dmy(date))
+
+crm_long
+```
+
+---
+
+With a long data frame and a `date` column, we can plot a time series of transactions.
+
+```{r eval=FALSE}
+crm_long |> 
+  group_by(date, region) |> 
+  summarize(
+    total_transactions = sum(transactions),
+    avg_transactions = mean(transactions)
+  ) |> 
+  ggplot(aes(x = date, y = avg_transactions, color = region)) +
+  geom_line() +
+  scale_x_date(date_breaks = "month", date_labels = "%b")
+```
+
+---
+
+```{r echo=FALSE}
+crm_long |> 
+  group_by(date, region) |> 
+  summarize(
+    total_transactions = sum(transactions),
+    avg_transactions = mean(transactions)
+  ) |> 
+  ggplot(aes(x = date, y = avg_transactions, color = region)) +
+  geom_line() +
+  scale_x_date(date_breaks = "month", date_labels = "%b")
+```
+
+## Data Classes and Types
+
+We've been using **data frames** (technically **tibbles**, a modern data frame). A data frame is composed of columns called **vectors**. Both data frames and vectors are classes of data.
+
+Each vector has a *single* data type. We've discussed **double** (i.e., numeric), **integer**, **date**, **character**, and **factor**. If we try to mix data types in a vector, it will pick the easiest one to satisfy.
+
+```{r}
+vector_example <- c(1, 2, "three")
+
+vector_example
+```
+
+---
+
+Data frames are nice to work with because each vector can be of a different data type.
+
+```{r}
+tibble(id = 1:3, state = "AZ")
+```
+
+## Coercion
+
+Sometimes we need to **coerce** a data class or type.
+
+```{r}
+as_tibble(vector_example)
+```
+
+Why would we want to coerce a data class?
+
+---
+
+We can similarly coerce data types with `as.*()` functions (e.g., `as.numeric()` and `as.character()`).
+
+Coercing dates can be tricky.
+
+We often want to coerce factors using the `fct_*()` functions.
+
+Why would we want to coerce a data type, especially factors?
+
+---
+
+```{r}
+crm_data |> 
+  mutate(region = fct_infreq(region)) |> 
+  ggplot(aes(x = region)) +
+  geom_bar()
+```
+
+---
+
+Note that `geom_bar()` is a wrapper for both `count()` and `geom_col()` (i.e., only a single variable is needed and the count is performed as part of the plot).
+
+We've already used `fct_reorder()` to coerce a factor ordered by another variable. Now we've used `fct_infreq()` to coerce a factor ordered by frequency and, if you like, `fct_rev()` to reverse that order.
+
+---
+
+```{r}
+crm_data |> 
+  mutate(region = region |> fct_infreq() |> fct_rev()) |> 
+  ggplot(aes(x = region)) +
+  geom_bar()
+```
+
+## Wrapping Up
+
+*Summary*
+
+- Discussed the philosophy of tidy data.
+- Practiced {tidyr} functions for tidying data.
+- Considered data classes, types, and coercion.
+
+*Next Time*
+
+- Querying databases.
+
+*Supplementary Material*
+
+- *R for Data Science (2e)* Chapters 6 and 30
+
+*Artwork by @allison_horst*
+
+## Exercise 5
+
+Customers are often analyzed based on those who have made recent purchases, frequent purchases, and spent the most. This is known as a recency, frequency, monetary (RFM) analysis. Now that we can tidy data, we can analyze customers based on recent purchases and frequent purchases. As you work, *remember to sketch out what you'd like the data to look like.* In RStudio on Posit Cloud, create a new Quarto document and do the following.
+
+1. Let's define customers who have made recent purchases as anyone who has made more than 10 transactions in 2018. Report on the composition of these customers.
+2. Let's define customers who have made frequent purchases as anyone who has made more than 150 transactions total. Report on the composition of these customers.
+3. Render the Quarto document into Word, export the Word document, and upload to Canvas.
+
