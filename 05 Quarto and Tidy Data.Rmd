@@ -4,39 +4,39 @@ subtitle: "MKTG 411 Marketing Analytics"
 output: 
   ioslides_presentation:
     widescreen: true
-    css: ../style.css
+    css: style.css
 ---
 
 ## Attention to Detail
 
 <center>
-![](../../Figures/meme_debugging.png){width=800px}
+![](Figures/meme_debugging.png){width=800px}
 </center>
 
 ---
 
 <center>
-![](../../Figures/monsters_debugging.png){width=850px}
+![](Figures/monsters_debugging.png){width=850px}
 </center>
 
 ## Marketing Analytics Process
 
 <center>
-![](../../Figures/process_tidy.png){width=900px}
+![](Figures/process_tidy.png){width=900px}
 </center>
 
 ---
 
-![](../../Figures/hex_rmarkdown-tidyr.png){width=850px}
+![](Figures/hex_rmarkdown-tidyr.png){width=850px}
 
 ---
 
-![](../../Figures/hex_quarto-tidyr.png){width=850px}
+![](Figures/hex_quarto-tidyr.png){width=850px}
 
 ---
 
 <center>
-![](../../Figures/monsters_quarto.png){width=800px}
+![](Figures/monsters_quarto.png){width=800px}
 </center>
 
 ## Quarto
@@ -114,7 +114,7 @@ This may seem obvious or simple, but this common philosophy is at the heart of t
 ---
 
 <center>
-![](../../Figures/wide_long.png){width=750px}
+![](Figures/wide_long.png){width=750px}
 </center>
 
 ## Pivot Longer
@@ -176,7 +176,7 @@ crm_long |>
 ---
 
 <center>
-![](../../Figures/pivot.gif){width=500px}
+![](Figures/pivot.gif){width=500px}
 </center>
 
 ## Separate Columns
