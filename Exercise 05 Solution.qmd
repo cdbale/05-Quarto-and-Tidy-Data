@@ -1,14 +1,14 @@
 ---
 title: "Exercise 5"
-author: "Marc Dotson"
 format: docx
 ---
 
-Customers are often analyzed based on those who have made recent purchases, frequent purchases, and spent the most. This is known as a recency, frequency, monetary (RFM) analysis. Now that we can tidy data, we can analyze customers based on recent purchases and frequent purchases. As you work, *remember to sketch out what you'd like the data to look like.* In RStudio on Posit Cloud, create a new Quarto document and do the following.
 
-1. Let's define customers who have made recent purchases as anyone who has made more than 10 transactions in 2018. Report on the composition of these customers.
-2. Let's define customers who have made frequent purchases as anyone who has made more than 150 transactions total. Report on the composition of these customers.
-3. Render the Quarto document into Word, export the Word document, and upload to Canvas.
+Customers are often analyzed based on those who have made recent purchases, frequent purchases, and spent the most. This is known as a recency, frequency, monetary (RFM) analysis. Now that we can tidy data, we can analyze customers based on recent purchases and frequent purchases. In RStudio, create a new Quarto document and do the following.
+
+1. How would you define customers who have made "recent" purchases? Remember, the most recent data we have for this exercise is from 2018. State how you are defining recency, and use R to report on the composition of these customers.
+2. How would you define customers who have made "frequent" purchases? Remember, the most recent data we have for this exercise is from 2018. State how you are defining frequency, and use R to report on the composition of these customers.
+3. Render the Quarto document into Word and upload to Canvas.
 
 **Five points total, one point each for:**
 
@@ -20,7 +20,7 @@ Customers are often analyzed based on those who have made recent purchases, freq
 
 ## Recency
 
-First, let's determine which customers have made more than 10 transactions in 2018.
+For one possible definition of recency, let's determine which customers have made more than 10 transactions in 2018.
 
 ```{r}
 # Load packages.
@@ -29,14 +29,14 @@ library(tidyverse)
 
 ```{r eval=FALSE}
 # Import data.
-crm_data <- read_csv("customer_data.csv") |> 
-  left_join(read_csv("store_transactions.csv"), join_by(customer_id))
+crm_data <- read_csv("customer_data.csv", show_col_types = F) |> 
+  left_join(read_csv("store_transactions.csv", show_col_types = F), join_by(customer_id))
 ```
 
 ```{r echo=FALSE}
 # Import data.
-crm_data <- read_csv(here::here("Data", "customer_data.csv")) |> 
-  left_join(read_csv(here::here("Data", "store_transactions.csv")), join_by(customer_id))
+crm_data <- read_csv("customer_data.csv", show_col_types = F) |> 
+  left_join(read_csv("store_transactions.csv", show_col_types = F), join_by(customer_id))
 ```
 
 ```{r}
@@ -97,7 +97,7 @@ Most recent customers have a college degree, are female, and are unmarried. They
 
 ## Frequency
 
-Now, let's determine which customers have made more than 150 transactions overall.
+For one possible definition of frequency, let's determine which customers have made more than 150 transactions overall.
 
 ```{r}
 # Tidy and summarize purchase history and filter on respondents
