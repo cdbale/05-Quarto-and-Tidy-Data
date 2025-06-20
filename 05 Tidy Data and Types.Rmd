@@ -1,5 +1,5 @@
 ---
-title: "Quarto and Tidy Data"
+title: "Tidy Data and Types"
 subtitle: "MKTG 411 Marketing Analytics"
 output: 
   ioslides_presentation:
@@ -23,33 +23,10 @@ output:
 
 <center>
 ![](Figures/process_tidy.png){width=900px}
-</center>
 
----
+## More About Quarto Docs - YAML
 
-![](Figures/hex_rmarkdown-tidyr.png){width=850px}
-
----
-
-![](Figures/hex_quarto-tidyr.png){width=850px}
-
----
-
-<center>
-![](Figures/monsters_quarto.png){width=800px}
-</center>
-
-## Quarto
-
-Quarto is a powerful **typesetting tool**. Instead of writing the report or presentation in Word, PowerPoint, or a Google Doc; running code in an R script; saving output and visualizations; and pasting them in the report or the presentation -- we can do it all in Quarto.
-
-- [Markdown](https://quarto.org/docs/authoring/markdown-basics.html): Simple typesetting syntax.
-- [Quarto](https://quarto.org/docs/guide/): Allows us to include code cells (in R, Python, SQL, etc.) and output as part of the document.
-- [Pandoc](https://pandoc.org): Magic that outputs the Quarto document as nearly anything.
-
-## YAML
-
-The header at the top of a Quarto document coded in **YAML** (i.e., Yet Another Markup Language).
+The header at the top of a Quarto document is coded in **YAML** (Yet Another Markup Language).
 
 ```
 ---
@@ -59,12 +36,10 @@ format: docx
 ---
 ```
 
-While Quarto can produce HTML documents, PowerPoint slides, slides (like these), [GitHub documents](https://github.com/marcdotson/ra-training), [blogs](https://www.occasionaldivergences.com), webpages, etc. -- unless specified otherwise, **all subsequent assignments will be submitted as Word documents rendered from a Quarto document**.
-
-## Quarto Basics
+## More About Quarto Docs - Quarto Best Practices
 
 - Use `##` headings and `###` sub-headings to clearly identify sections.
-- Code cells begin with `‘‘‘{r}` and end with `‘‘‘` and should include *comments* but not *text*.
+- Code cells begin with `'''{r}` and end with `'''` and should include *comments* but not *text*.
 - Use a separate code cell for every question so that output and text can be provided *in-line*.
 - Produce bullet points using -s.
 - Identify `functions` and `data` with `s, *italics* with *s, and **bold** with **s.
@@ -73,6 +48,19 @@ While Quarto can produce HTML documents, PowerPoint slides, slides (like these),
 - Pay attention to required white space.
 - Render the document to produce the specified output.
 - **Always read the output.**
+
+## Motivating Example
+
+Your manager at Patagonia is very interested in determining the trend in sales transactions over time. That sounds easy enough, so you ask her to get you the data so you can give it a try. This is what the CRM export looks like. How can you work with this using functions we've learned?
+
+---
+
+<center>
+![](Figures/crm.png){width=750px}
+
+---
+
+This was somewhat of a trick question, because there is an easier way to format this data.
 
 ---
 
@@ -83,13 +71,13 @@ library(tidyverse)
 ---
 
 ```{r eval=FALSE}
-crm_data <- read_csv("customer_data.csv") |> 
-  left_join(read_csv("store_transactions.csv"), join_by(customer_id))
+crm_data <- read_csv("customer_data.csv", show_col_types = FALSE) |> 
+  left_join(read_csv("store_transactions.csv", show_col_types = FALSE), join_by(customer_id))
 ```
 
 ```{r echo=FALSE}
-crm_data <- read_csv(here::here("Data", "customer_data.csv")) |> 
-  left_join(read_csv(here::here("Data", "store_transactions.csv")), join_by(customer_id))
+crm_data <- read_csv("customer_data.csv", show_col_types = FALSE) |> 
+  left_join(read_csv("store_transactions.csv", show_col_types = FALSE), join_by(customer_id))
 ```
 
 ## Data Structure and Summarizing
@@ -178,6 +166,29 @@ crm_long |>
 <center>
 ![](Figures/pivot.gif){width=500px}
 </center>
+
+## Your Turn!
+
+Is this data frame tidy? Why or why not? If not, use the appropriate pivot.
+
+```{r}
+
+billboard
+
+```
+## Solution
+
+```{r}
+
+billboard |> pivot_longer(
+  wk1:wk76,
+  names_to = "week", 
+  values_to = "rank", 
+  values_drop_na = TRUE
+  )
+
+```
+
 
 ## Separate Columns
 
@@ -292,11 +303,31 @@ as_tibble(vector_example)
 
 Why would we want to coerce a data class?
 
----
-
 We can similarly coerce data types with `as.*()` functions (e.g., `as.numeric()` and `as.character()`).
 
-Coercing dates can be tricky.
+## Your Turn!
+
+Let's say you're building a predictive model for Patagonia, when you realize that the customer zip codes are being treated as numeric data by R. Why might this be a problem? How could you use coercion to fix it?
+
+```{r}
+
+zip_codes <- c(30301, 60614, 90210, 10001, 73301, 02138, 44101, 84101, 19104, 96815)
+
+glimpse(zip_codes)
+
+```
+
+## Solution
+
+```{r}
+
+zip_codes <- as.character(zip_codes)
+
+glimpse(zip_codes)
+
+```
+
+---
 
 We often want to coerce factors using the `fct_*()` functions.
 
@@ -326,6 +357,12 @@ crm_data |>
   geom_bar()
 ```
 
+
+## Live Coding Exercise
+
+Using the skills we learned today, the company would like us to create a graph that clearly displays the trend in 2018 transactions for married, college educated customers in the South region. How can we accomplish this using the two datasets we have access to?
+
+
 ## Wrapping Up
 
 *Summary*
@@ -346,9 +383,9 @@ crm_data |>
 
 ## Exercise 5
 
-Customers are often analyzed based on those who have made recent purchases, frequent purchases, and spent the most. This is known as a recency, frequency, monetary (RFM) analysis. Now that we can tidy data, we can analyze customers based on recent purchases and frequent purchases. As you work, *remember to sketch out what you'd like the data to look like.* In RStudio on Posit Cloud, create a new Quarto document and do the following.
+Customers are often analyzed based on those who have made recent purchases, frequent purchases, and spent the most. This is known as a recency, frequency, monetary (RFM) analysis. Now that we can tidy data, we can analyze customers based on recent purchases and frequent purchases. In RStudio, create a new Quarto document and do the following.
 
-1. Let's define customers who have made recent purchases as anyone who has made more than 10 transactions in 2018. Report on the composition of these customers.
-2. Let's define customers who have made frequent purchases as anyone who has made more than 150 transactions total. Report on the composition of these customers.
-3. Render the Quarto document into Word, export the Word document, and upload to Canvas.
+1. How would you define customers who have made "recent" purchases? Remember, the most recent data we have for this exercise is from 2018. State how you are defining recency, and use R to report on the composition of these customers.
+2. How would you define customers who have made "frequent" purchases? Remember, the most recent data we have for this exercise is from 2018. State how you are defining frequency, and use R to report on the composition of these customers.
+3. Render the Quarto document into Word and upload to Canvas.
 
