@@ -1,7 +1,74 @@
 ---
-title: "05 Tidy Data Starter Code"
+title: "05 Tidy Data and Types Starter Code"
 format: docx
 editor: visual
 ---
 
-## 
+## Lecture 05 Notes
+
+```{r}
+
+# Load the tidyverse.
+
+library(tidyverse)
+```
+
+```{r}
+
+# Read in the customer and transaction data (make sure it's in your working directory).
+
+crm_data <- read_csv("customer_data.csv", show_col_types = FALSE) |> 
+  left_join(read_csv("store_transactions.csv", show_col_types = FALSE), join_by(customer_id))
+```
+
+### Data Structure and Summarizing
+
+```{r}
+
+# This code shows the region and customer ID corresponding with every transaction in 2018
+
+crm_data |> 
+  select(region, customer_id, contains("2018"))
+```
+
+### Pivot Longer
+
+```{r}
+
+# This code pivots the 2018 transactions into a tidy format. The column names (e.g. "jan_2018") become values in a new column called "month_year," and the transactions get their own column.
+
+crm_long <- crm_data |>
+  select(region, customer_id, contains("2018")) |> 
+  pivot_longer(
+    -c(region, customer_id),
+    names_to = "month_year",
+    values_to = "transactions"
+  )
+
+crm_long
+```
+
+```{r}
+
+# This code uses the new long dataframe to summarize the 2018 transactions by region.
+
+crm_long |> 
+  group_by(region) |> 
+  summarize(
+    total_transactions = sum(transactions),
+    avg_transactions = mean(transactions)
+  )
+```
+
+### Pivot Wider
+
+```{r}
+
+# This code 
+
+crm_long |> 
+  pivot_wider(
+    names_from = month_year,
+    values_from = transactions
+  )
+```
