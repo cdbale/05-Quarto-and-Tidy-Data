@@ -64,11 +64,157 @@ crm_long |>
 
 ```{r}
 
-# This code 
+# This code pivots our long form data frame back to its original wide state.
 
 crm_long |> 
   pivot_wider(
     names_from = month_year,
     values_from = transactions
   )
+```
+
+### Your Turn!
+
+```{r}
+
+# This code prints the billboard dataset, which is built in with the tidyverse
+
+billboard
+```
+
+```{r}
+
+# Determine if the above data frame is tidy, and write the code to make it tidy if not.
+
+```
+
+### Separate Columns
+
+```{r}
+
+# This code separates the month_year column that we created into seperate month and year columns.
+
+crm_long <- crm_long |>
+  separate(month_year, c("month", "year"), sep = "_")
+
+crm_long
+```
+
+```{r}
+
+# This code allows us to pinpoint which month has the most transactions for 2018 in each region.
+
+crm_long |> 
+  group_by(month, region) |> 
+  summarize(
+    total_transactions = sum(transactions),
+    avg_transactions = mean(transactions)
+  ) |> 
+  arrange(desc(avg_transactions))
+```
+
+### Unite Columns
+
+```{r}
+
+# This code unites the month and year back together.
+
+crm_long |>
+  unite("month_year", c(month, year), sep = "_")
+```
+
+```{r}
+
+# This code uses lubridate to help R recognize the dates in our dataset. We add a default day value of 1 to each row in the data to accomplish this.
+
+crm_long <- crm_long |>
+  mutate(day = 1) |> 
+  unite("date", c(day, month, year), sep = "-") |> 
+  mutate(date = dmy(date))
+
+crm_long
+```
+
+```{r}
+
+# This code plots a time seris of the transactions
+
+crm_long |> 
+  group_by(date, region) |> 
+  summarize(
+    total_transactions = sum(transactions),
+    avg_transactions = mean(transactions)
+  ) |> 
+  ggplot(aes(x = date, y = avg_transactions, color = region)) +
+  geom_line() +
+  scale_x_date(date_breaks = "month", date_labels = "%b")
+```
+
+### Data Classes and Types
+
+```{r}
+
+# This code creates a vector. What data type did R treat all three items as?
+
+vector_example <- c(1, 2, "three")
+
+vector_example
+```
+
+```{r}
+
+# This code creates a tibble to demonstrate how different types can be combined.
+
+tibble(id = 1:3, state = "AZ")
+```
+
+```{r}
+
+# This code displays our first example as a tibble, so that each item can retain its original type.
+
+as_tibble(vector_example)
+```
+
+### Your Turn!
+
+```{r}
+
+# This code saves the zip codes.
+
+zip_codes <- c(30301, 60614, 90210, 10001, 73301, 02138, 44101, 84101, 19104, 96815)
+
+glimpse(zip_codes)
+```
+
+```{r}
+
+# Use this space to coerce the zip codes into a more appropriate type.
+
+```
+
+```{r}
+
+# This code uses coercion to order the bars in a bar chart.
+
+crm_data |> 
+  mutate(region = fct_infreq(region)) |> 
+  ggplot(aes(x = region)) +
+  geom_bar()
+```
+
+```{r}
+
+# This code reverses that order.
+
+crm_data |> 
+  mutate(region = region |> fct_infreq() |> fct_rev()) |> 
+  ggplot(aes(x = region)) +
+  geom_bar()
+```
+
+### Live Coding Exercise
+
+```{r}
+
+# Use this space to participate in the live coding exercise.
 ```
