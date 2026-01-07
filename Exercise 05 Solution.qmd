@@ -6,15 +6,15 @@ format: docx
 
 Customers are often analyzed based on those who have made recent purchases, frequent purchases, and spent the most. This is known as a recency, frequency, monetary (RFM) analysis. Now that we can tidy data, we can analyze customers based on recent purchases and frequent purchases. In RStudio, create a new Quarto document and do the following.
 
-1. How would you define customers who have made "recent" purchases? Remember, the most recent data we have for this exercise is from 2018. State how you are defining recency, and use R to report on the composition of these customers.
-2. How would you define customers who have made "frequent" purchases? Remember, the most recent data we have for this exercise is from 2018. State how you are defining frequency, and use R to report on the composition of these customers.
+1. How would you define customers who have made "recent" purchases? State how you are defining recency, and use R to report on the composition of these customers.
+2. How would you define customers who have made "frequent" purchases? State how you are defining frequency, and use R to report on the composition of these customers.
 3. Render the Quarto document into Word and upload to Canvas.
 
 **Five points total, one point each for:**
 
-- **Recode the data to identify recent customers.**
+- **Tidy and transform the data to identify recent customers.**
 - **Explore the composition of recent customers and provide an explanation.**
-- **Recode the data to identify frequent customers.**
+- **Tidy and transform the data to identify frequent customers.**
 - **Explore the composition of frequent customers and provide an explanation.**
 - **Submitting a rendered Word document.**
 
@@ -25,12 +25,6 @@ For one possible definition of recency, let's determine which customers have mad
 ```{r}
 # Load packages.
 library(tidyverse)
-```
-
-```{r eval=FALSE}
-# Import data.
-crm_data <- read_csv("customer_data.csv", show_col_types = F) |> 
-  left_join(read_csv("store_transactions.csv", show_col_types = F), join_by(customer_id))
 ```
 
 ```{r echo=FALSE}
@@ -65,7 +59,7 @@ recent_cust <- recent_cust |>
 
 # Explore distributions of continuous variables.
 recent_cust |> 
-  mutate(age = 2021 - birth_year) |> 
+  mutate(age = 2026 - birth_year) |> 
   select(total_transactions, income, credit, age) |> 
   pivot_longer(
     total_transactions:age,
@@ -74,10 +68,13 @@ recent_cust |>
   ) |> 
   ggplot(aes(x = var_values)) +
   geom_histogram() +
-  facet_wrap(~ var_names, scales = "free")
+  facet_wrap(~ var_names, scales = "free") +
+  labs(x = "Continuous Variables",
+       y = "Count",
+       title = "Continuous Variable Distributions for Recent Customers")
 ```
 
-Recent customers don't look so dissimilar from the overall customer base in terms of continuous variables: same sort of `age`, `credit`, and `income` distributions. In terms of `total_transactions`, we see a long tail above 10 transactions, up to 35.
+Recent customers tend to be below 60 years old. Credit scores vary substantially, with most around 650. Most incomes are below 200,000, with a few in the upper tail that approach 400,000. In terms of `total_transactions`, we see a long tail above 10 transactions, up to 35.
 
 ```{r}
 # Explore distributions of discrete variables.
@@ -90,10 +87,13 @@ recent_cust |>
   ) |> 
   ggplot(aes(x = var_values)) +
   geom_bar() +
-  facet_wrap(~ var_names, scales = "free")
+  facet_wrap(~ var_names, scales = "free") +
+  labs(x = "Categorical Variables",
+       y = "Count",
+       title = "Categorical Variable Distributions for Recent Customers")
 ```
 
-Most recent customers have a college degree, are female, and are unmarried. They appear to be fairly evenly distributed across regions, compared to the overall customer base.
+Most recent customers have a college degree, are female, are unmarried, and tend to shop in the Northeast and West regions.
 
 ## Frequency
 
@@ -125,7 +125,7 @@ frequent_cust <- frequent_cust |>
 
 # Explore distributions of continuous variables.
 frequent_cust |> 
-  mutate(age = 2021 - birth_year) |> 
+  mutate(age = 2026 - birth_year) |> 
   select(total_transactions, income, credit, age) |> 
   pivot_longer(
     total_transactions:age,
@@ -134,10 +134,13 @@ frequent_cust |>
   ) |> 
   ggplot(aes(x = var_values)) +
   geom_histogram() +
-  facet_wrap(~ var_names, scales = "free")
+  facet_wrap(~ var_names, scales = "free") +
+  labs(x = "Continuous Variables",
+       y = "Count",
+       title = "Continuous Variable Distributions for Frequent Customers")
 ```
 
-Frequent customers don't look so dissimilar from the overall customer base in terms of continuous variables: maybe skewed slightly younger but `credit` and `income` distributed the same. In terms of `total_transactions`, we see a long tail above 150 transactions, up to nearly 250 transactions total.
+Frequent customers look fairly similar to the recent customers on continuous variables, with perhaps a slightly higher average credit score.
 
 ```{r}
 # Explore distributions of discrete variables.
@@ -150,8 +153,11 @@ frequent_cust |>
   ) |> 
   ggplot(aes(x = var_values)) +
   geom_bar() +
-  facet_wrap(~ var_names, scales = "free")
+  facet_wrap(~ var_names, scales = "free") +
+  labs(x = "Categorical Variables",
+       y = "Count",
+       title = "Categorical Variable Distributions for Frequent Customers")
 ```
 
-Similarly, most frequent customers have a college degree, are female, and are unmarried. They appear to be fairly evenly distributed across regions, compared to the overall customer base.
+Similarly, most frequent customers have a college degree, are female, are unmarried, and tend to shop in the Northeast and West regions.
 

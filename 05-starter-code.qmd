@@ -10,15 +10,14 @@ editor: visual
 
 # Load the tidyverse.
 
-library(tidyverse)
 ```
 
 ```{r}
 
 # Read in the customer and transaction data (make sure it's in your working directory).
 
-crm_data <- read_csv("customer_data.csv", show_col_types = FALSE) |> 
-  left_join(read_csv("store_transactions.csv", show_col_types = FALSE), join_by(customer_id))
+# join the store transactions data to the customer data - call the joined data "crm_data"
+
 ```
 
 ### Data Structure and Summarizing
@@ -52,6 +51,9 @@ crm_long
 
 # This code uses the new long dataframe to summarize the 2018 transactions by region.
 
+# This gives us the total number of transactions and average number of transactions per customer per month for each region
+# this would have been very difficult to compute using data in the wide format
+
 crm_long |> 
   group_by(region) |> 
   summarize(
@@ -84,7 +86,7 @@ billboard
 
 ```{r}
 
-# Determine if the above data frame is tidy, and write the code to make it tidy if not.
+# Determine if the above data frame is tidy. If it isn't, write code to make it tidy
 
 ```
 
@@ -137,7 +139,7 @@ crm_long
 
 ```{r}
 
-# This code plots a time seris of the transactions
+# This code plots a time series of the transactions
 
 crm_long |> 
   group_by(date, region) |> 
@@ -177,6 +179,8 @@ as_tibble(vector_example)
 
 ### Your Turn!
 
+Suppose you are building a ggplot visualization that shows the distributions of customer incomes for different zip codes. However, R is treating the values of zip code as a numeric value. Is this correct? If not, what data type might make more sense? Perform the appropriate coercion.
+
 ```{r}
 
 # This code saves the zip codes.
@@ -213,6 +217,8 @@ crm_data |>
 ```
 
 ### Live Coding Exercise
+
+Let's return to the motivating example. Patagonia has requested a report on sales trends over time. Let's put together a plot to go in that report.
 
 ```{r}
 

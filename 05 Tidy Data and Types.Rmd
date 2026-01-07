@@ -1,6 +1,6 @@
 ---
 title: "Tidy Data and Types"
-subtitle: "MKTG 411 Marketing Analytics"
+subtitle: "MCB Consulting Group (MKTG 411)"
 output: 
   ioslides_presentation:
     widescreen: true
@@ -19,11 +19,6 @@ output:
 ![](Figures/monsters_debugging.png){width=850px}
 </center>
 
-## Marketing Analytics Process
-
-<center>
-![](Figures/process_tidy.png){width=900px}
-
 ## More About Quarto Docs - YAML
 
 The header at the top of a Quarto document is coded in **YAML** (Yet Another Markup Language).
@@ -31,7 +26,7 @@ The header at the top of a Quarto document is coded in **YAML** (Yet Another Mar
 ```
 ---
 title: "Exercise 5"
-author: "Marc Dotson"
+author: "Cameron Bale"
 format: docx
 ---
 ```
@@ -40,27 +35,35 @@ format: docx
 
 - Use `##` headings and `###` sub-headings to clearly identify sections.
 - Code cells begin with `'''{r}` and end with `'''` and should include *comments* but not *text*.
-- Use a separate code cell for every question so that output and text can be provided *in-line*.
-- Produce bullet points using -s.
+- Use a separate code cell for every task so that output and text can be provided *in-line*.
+- Produce bullet points using '-'.
 - Identify `functions` and `data` with `s, *italics* with *s, and **bold** with **s.
 - Quarto also has a visual editor.
 - There are options, including running all previous code or a single code cell.
-- Pay attention to required white space.
-- Render the document to produce the specified output.
-- **Always read the output.**
+- After you render, **Always read the output.**
 
 ## Motivating Example
 
-Your manager at Patagonia is very interested in determining the trend in sales transactions over time. That sounds easy enough, so you ask her to get you the data so you can give it a try. This is what the CRM export looks like. How can you work with this using functions we've learned?
+Patagonia has requested a report on sales trends over time. What are some statistics we could compute to support this analysis? How could we compute these statistics using the Patagonia sales data?
 
 ---
 
 <center>
 ![](Figures/crm.png){width=750px}
 
----
+## This Data is Problematic!
 
-This was somewhat of a trick question, because there is an easier way to format this data.
+The current data format won't allow us to perform many of the calculations we want using `tidyverse` functions.
+
+- How do we compute the total transactions per year?
+- How do we compute the number of transactions for each customer?
+
+Luckily, we can use some functions to `tidy` our data...
+
+## Marketing Analytics Process
+
+<center>
+![](Figures/process_tidy.png){width=900px}
 
 ---
 
@@ -82,7 +85,7 @@ crm_data <- read_csv("customer_data.csv", show_col_types = FALSE) |>
 
 ## Data Structure and Summarizing
 
-How can we summarize the transactions for 2018 by region?
+Task: compute the *total* transactions and *average transactions per month per customer* for 2018 by region.
 
 ```{r}
 crm_data |> 
@@ -176,9 +179,10 @@ Is this data frame tidy? Why or why not? If not, use the appropriate pivot.
 billboard
 
 ```
-## Solution
 
-```{r}
+## Desired Output
+
+```{r, echo=FALSE}
 
 billboard |> pivot_longer(
   wk1:wk76,
@@ -189,10 +193,35 @@ billboard |> pivot_longer(
 
 ```
 
+## Solution 1
+
+```{r, eval=FALSE}
+
+billboard |> pivot_longer(
+  wk1:wk76,
+  names_to = "week", 
+  values_to = "rank", 
+  values_drop_na = TRUE
+  )
+
+```
+
+## Solution 2
+
+```{r, eval=FALSE}
+
+billboard |> pivot_longer(
+  -c(artist, track, date.entered),
+  names_to = "week", 
+  values_to = "rank", 
+  values_drop_na = TRUE
+  )
+
+```
 
 ## Separate Columns
 
-If two (or more) values are in one column, `separate()` the values into two (or more) columns.
+Sometimes columns contain more than one data value. Use `separate()` to split those values into two (or more) columns.
 
 ```{r}
 crm_long
@@ -209,7 +238,7 @@ crm_long
 
 ---
 
-Now we can summarize the transactions for 2018 by month *and* region.
+Now we can summarize the transactions for 2018 by region *and* month.
 
 ```{r}
 crm_long |> 
@@ -277,7 +306,7 @@ crm_long |>
 
 We've been using **data frames** (technically **tibbles**, a modern data frame). A data frame is composed of columns called **vectors**. Both data frames and vectors are classes of data.
 
-Each vector has a *single* data type. We've discussed **double** (i.e., numeric), **integer**, **date**, **character**, and **factor**. If we try to mix data types in a vector, it will pick the easiest one to satisfy.
+Each vector has a *single* data type. We've discussed **double** (i.e., numeric), **integer**, **date**, **character**, and **factor**. If we try to mix data types in a vector, R will *coerce* one data type to match the other.
 
 ```{r}
 vector_example <- c(1, 2, "three")
@@ -307,7 +336,7 @@ We can similarly coerce data types with `as.*()` functions (e.g., `as.numeric()`
 
 ## Your Turn!
 
-Let's say you're building a predictive model for Patagonia, when you realize that the customer zip codes are being treated as numeric data by R. Why might this be a problem? How could you use coercion to fix it?
+Suppose you are building a ggplot visualization that shows the distributions of customer incomes for different zip codes. However, R is treating the values of zip code as a numeric value. Is this correct? If not, what data type might make more sense? Perform the appropriate coercion.
 
 ```{r}
 
@@ -317,9 +346,19 @@ glimpse(zip_codes)
 
 ```
 
-## Solution
+## Desired Output
 
-```{r}
+```{r, echo=FALSE}
+
+zip_codes <- as.character(zip_codes)
+
+glimpse(zip_codes)
+
+```
+
+## Code Solution
+
+```{r, eval=FALSE}
 
 zip_codes <- as.character(zip_codes)
 
@@ -330,10 +369,6 @@ glimpse(zip_codes)
 ---
 
 We often want to coerce factors using the `fct_*()` functions.
-
-Why would we want to coerce a data type, especially factors?
-
----
 
 ```{r}
 crm_data |> 
@@ -360,8 +395,7 @@ crm_data |>
 
 ## Live Coding Exercise
 
-Using the skills we learned today, the company would like us to create a graph that clearly displays the trend in 2018 transactions for married, college educated customers in the South region. How can we accomplish this using the two datasets we have access to?
-
+Let's return to the motivating example. Patagonia has requested a report on sales trends over time. Let's put together a plot to go in that report.
 
 ## Wrapping Up
 
@@ -385,7 +419,7 @@ Using the skills we learned today, the company would like us to create a graph t
 
 Customers are often analyzed based on those who have made recent purchases, frequent purchases, and spent the most. This is known as a recency, frequency, monetary (RFM) analysis. Now that we can tidy data, we can analyze customers based on recent purchases and frequent purchases. In RStudio, create a new Quarto document and do the following.
 
-1. How would you define customers who have made "recent" purchases? Remember, the most recent data we have for this exercise is from 2018. State how you are defining recency, and use R to report on the composition of these customers.
-2. How would you define customers who have made "frequent" purchases? Remember, the most recent data we have for this exercise is from 2018. State how you are defining frequency, and use R to report on the composition of these customers.
+1. How would you define customers who have made "recent" purchases? State how you are defining recency, and use R to report on the composition of these customers.
+2. How would you define customers who have made "frequent" purchases? State how you are defining frequency, and use R to report on the composition of these customers.
 3. Render the Quarto document into Word and upload to Canvas.
 
